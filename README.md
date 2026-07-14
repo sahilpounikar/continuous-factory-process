@@ -3,7 +3,7 @@
 
 Predicting quality defects on a real continuous manufacturing line using sensor data, and tracing each prediction back to the machine readings most responsible for it.
 
-**Live site:** https://YOUR-USERNAME.github.io/continuous-factory-process/
+**Live site:** Live https://sahilpounikar.github.io/continuous-factory-process/
 
 ---
 
