@@ -44,7 +44,7 @@ Full confusion matrix and top-10 feature ranking are in the notebook and on the 
 
 ## Root Cause Dashboard
 
-An interactive Tableau dashboard (`Root_cause_analysis_dashboard.twbx`) lets you explore defect risk by stage, machine, and measurement. Published version linked on the live site.
+An interactive Tableau dashboard lets you explore defect risk by stage, machine, and measurement — filter and drill down live. View it on the live site.
 
 ## Repository contents
 
