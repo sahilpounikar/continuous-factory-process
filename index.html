@@ -258,7 +258,7 @@
       root cause analysis.
     </p>
     <div class="hero-links">
-      <a class="btn btn-solid" href="https://github.com/sahilpounikar/continuous-factory-process" target="_blank" rel="noopener">View on GitHub →</a>
+      <a class="btn btn-solid" href="https://github.com/YOUR-USERNAME/continuous-factory-process" target="_blank" rel="noopener">View on GitHub →</a>
       <a class="btn btn-ghost" href="#dashboard">Root Cause Dashboard</a>
       <a class="btn btn-ghost" href="#results">See Results</a>
     </div>
@@ -292,7 +292,7 @@
 
     <div class="stats">
       <div class="stat">
-        <div class="stat-num">96%</div>
+        <div class="stat-num">95.9%</div>
         <div class="stat-label">Random Forest accuracy</div>
       </div>
       <div class="stat">
@@ -332,6 +332,12 @@
           <p>A model that catches high-risk output reliably, and — just as important for a factory floor —
           points to *which* sensor readings are driving that risk, so engineers know what to physically check.</p>
         </div>
+      </div>
+
+      <div class="panel img-panel" style="margin-top:32px;">
+        <div class="panel-title">Class Distribution — Defect Risk Label</div>
+        <img src="target_distribution.png" alt="Bar chart showing the distribution of defect-risk vs normal output in the dataset">
+        <div class="img-caption">~20% of records fall into the high-defect-risk class after thresholding — a real class imbalance to design around</div>
       </div>
     </div>
   </section>
@@ -376,7 +382,7 @@
         </div>
         <div class="panel img-panel">
           <div class="panel-title">Confusion Matrix — Random Forest</div>
-          <img src="confusion_matrix.png" alt="Random Forest confusion matrix showing predicted vs actual defect risk">
+          <img src="assets/confusion_matrix.png" alt="Random Forest confusion matrix showing predicted vs actual defect risk">
           <div class="img-caption">Predicted vs. actual defect-risk class on the test set</div>
         </div>
       </div>
@@ -409,14 +415,18 @@
         Built in Tableau from the same feature-importance and process data — filter by stage, machine,
         or measurement to see where defect risk concentrates.
       </p>
-  <div class="dashboard-frame">
-    <iframe src="https://public.tableau.com/views/Rootcauseanalysisdashboard/FactoryProcessOverview?:showVizHome=no&:embed=true" width="100%" height="800px" style="border: none;" allowfullscreen></iframe>
-</div>
+      <div class="dashboard-frame">
+        <iframe src="https://public.tableau.com/views/YOUR_WORKBOOK_NAME/YOUR_DASHBOARD_NAME?:showVizHome=no&:embed=true"
+                allowfullscreen></iframe>
+      </div>
+      <div class="dashboard-note">
+        Replace the iframe src above once you've published Root_cause_analysis_dashboard.twbx to Tableau Public — steps below.
+      </div>
     </div>
   </section>
 
   <!-- STACK -->
-<section id="stack" style="margin-top: 80px;">
+  <section id="stack">
     <div class="wrap">
       <div class="sec-eyebrow">Tech Stack</div>
       <h2>Built with</h2>
@@ -440,9 +450,9 @@
   <div class="wrap footer-row">
     <div class="footer-meta">© Continuous Factory Process — Defect Prediction Project</div>
     <div class="footer-links">
-      <a href="https://github.com/sahilpounikar" target="_blank" rel="noopener">GitHub</a>
-      <a href="https://www.linkedin.com/in/sahil-pounikar" target="_blank" rel="noopener">LinkedIn</a>
-      <a href="mailto:sahilpounikar@gmail.com">Email</a>
+      <a href="https://github.com/YOUR-USERNAME" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://www.linkedin.com/in/YOUR-LINKEDIN" target="_blank" rel="noopener">LinkedIn</a>
+      <a href="mailto:YOUR-EMAIL@example.com">Email</a>
     </div>
   </div>
 </footer>
