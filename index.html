@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Continuous Factory Process — Defect Prediction & Root Cause Analysis</title>
+<meta name="description" content="Predicting quality defects in a continuous manufacturing process using sensor data, Random Forest, and root-cause feature analysis.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+
+<style>
+  :root{
+    --void:#0e1317;
+    --panel:#161d23;
+    --panel-2:#1c242b;
+    --line:#2a343c;
+    --text:#e9edf0;
+    --muted:#8b98a3;
+    --amber:#f2a33d;
+    --cyan:#4fb8c4;
+    --red:#e15554;
+    --mono: 'IBM Plex Mono', monospace;
+    --display: 'Space Grotesk', sans-serif;
+    --body: 'Inter', sans-serif;
+    --maxw: 1120px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--void);
+    color:var(--text);
+    font-family:var(--body);
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  img{max-width:100%; display:block;}
+  a{color:inherit;}
+
+  ::selection{background:var(--amber); color:var(--void);}
+
+  /* background texture: faint grid, like a factory floor plan */
+  body::before{
+    content:"";
+    position:fixed; inset:0;
+    background-image:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size:64px 64px;
+    opacity:0.12;
+    pointer-events:none;
+    z-index:0;
+  }
+
+  .wrap{max-width:var(--maxw); margin:0 auto; padding:0 28px; position:relative; z-index:1;}
+
+  /* NAV */
+  header{
+    position:sticky; top:0; z-index:50;
+    background:rgba(14,19,23,0.88);
+    backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line);
+  }
+  nav{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:16px 28px; max-width:var(--maxw); margin:0 auto;
+  }
+  .logo{
+    font-family:var(--mono); font-size:13px; letter-spacing:0.04em;
+    color:var(--text); text-decoration:none; display:flex; align-items:center; gap:8px;
+  }
+  .logo .dot{width:8px;height:8px;border-radius:50%;background:var(--amber); box-shadow:0 0 8px var(--amber);}
+  .navlinks{display:flex; gap:28px; list-style:none;}
+  .navlinks a{
+    font-family:var(--mono); font-size:12px; text-transform:uppercase; letter-spacing:0.08em;
+    color:var(--muted); text-decoration:none; transition:color .2s;
+  }
+  .navlinks a:hover{color:var(--amber);}
+  @media(max-width:720px){ .navlinks{display:none;} }
+
+  /* HERO */
+  .hero{padding:96px 0 64px; position:relative;}
+  .eyebrow{
+    font-family:var(--mono); font-size:12px; color:var(--cyan);
+    text-transform:uppercase; letter-spacing:0.12em; margin-bottom:20px;
+    display:flex; align-items:center; gap:10px;
+  }
+  .eyebrow::before{content:"";width:22px;height:1px;background:var(--cyan);}
+  h1{
+    font-family:var(--display); font-weight:700;
+    font-size:clamp(2.1rem, 5vw, 3.6rem);
+    line-height:1.08; letter-spacing:-0.01em;
+    max-width:820px;
+  }
+  h1 .accent{color:var(--amber);}
+  .lede{
+    margin-top:22px; max-width:640px; color:var(--muted);
+    font-size:1.05rem;
+  }
+  .hero-links{display:flex; gap:14px; margin-top:34px; flex-wrap:wrap;}
+  .btn{
+    font-family:var(--mono); font-size:13px; letter-spacing:0.03em;
+    padding:12px 20px; border-radius:2px; text-decoration:none;
+    display:inline-flex; align-items:center; gap:8px; transition:all .2s;
+    border:1px solid var(--line);
+  }
+  .btn-solid{background:var(--amber); color:var(--void); border-color:var(--amber); font-weight:600;}
+  .btn-solid:hover{background:#ffb84f;}
+  .btn-ghost{color:var(--text);}
+  .btn-ghost:hover{border-color:var(--cyan); color:var(--cyan);}
+
+  /* PROCESS LINE — signature element */
+  .process-line{
+    margin-top:72px; padding:32px 0 8px;
+    border-top:1px solid var(--line);
+    position:relative;
+    overflow:visible;
+  }
+  .pl-track{
+    position:relative; height:2px; background:var(--line);
+    margin:0 0 28px 0;
+  }
+  .pl-pulse{
+    position:absolute; top:50%; left:0; width:8px; height:8px; margin-top:-4px;
+    border-radius:50%; background:var(--amber); box-shadow:0 0 12px var(--amber);
+    animation:travel 6s linear infinite;
+  }
+  @keyframes travel{
+    0%{left:0%;}
+    100%{left:100%;}
+  }
+  .pl-stages{display:grid; grid-template-columns:repeat(4,1fr); gap:20px;}
+  .pl-stage{position:relative;}
+  .pl-stage::before{
+    content:"";position:absolute; top:-42px; left:0; width:10px; height:10px;
+    border-radius:50%; background:var(--void); border:2px solid var(--cyan);
+  }
+  .pl-num{font-family:var(--mono); font-size:11px; color:var(--cyan); letter-spacing:0.1em;}
+  .pl-title{font-family:var(--display); font-weight:600; font-size:1rem; margin-top:6px;}
+  .pl-desc{font-size:0.85rem; color:var(--muted); margin-top:4px;}
+  @media(max-width:820px){
+    .pl-stages{grid-template-columns:1fr 1fr; row-gap:44px;}
+  }
+
+  /* STATS */
+  .stats{
+    display:grid; grid-template-columns:repeat(4,1fr);
+    border:1px solid var(--line); border-radius:4px;
+    margin-top:56px; background:var(--panel);
+  }
+  .stat{padding:26px 22px; border-right:1px solid var(--line);}
+  .stat:last-child{border-right:none;}
+  .stat-num{font-family:var(--display); font-size:2rem; font-weight:700; color:var(--amber);}
+  .stat-label{font-family:var(--mono); font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:0.06em; margin-top:6px;}
+  @media(max-width:720px){
+    .stats{grid-template-columns:1fr 1fr;}
+    .stat{border-bottom:1px solid var(--line);}
+  }
+
+  /* SECTIONS */
+  section{padding:88px 0; border-top:1px solid var(--line);}
+  .sec-eyebrow{
+    font-family:var(--mono); font-size:12px; color:var(--cyan);
+    text-transform:uppercase; letter-spacing:0.1em; margin-bottom:14px;
+  }
+  h2{
+    font-family:var(--display); font-weight:700; font-size:clamp(1.6rem,3vw,2.2rem);
+    max-width:640px; margin-bottom:20px;
+  }
+  .sec-intro{color:var(--muted); max-width:640px; margin-bottom:44px;}
+
+  .grid-2{display:grid; grid-template-columns:1fr 1fr; gap:40px;}
+  @media(max-width:800px){ .grid-2{grid-template-columns:1fr;} }
+
+  .card{
+    background:var(--panel); border:1px solid var(--line); border-radius:4px; padding:24px;
+  }
+  .card h3{font-family:var(--display); font-size:1.05rem; margin-bottom:10px;}
+  .card p{color:var(--muted); font-size:0.92rem;}
+  .card ul{margin-top:12px; padding-left:18px; color:var(--muted); font-size:0.9rem;}
+  .card li{margin-bottom:6px;}
+  .code-pill{
+    display:inline-block; font-family:var(--mono); font-size:0.78rem;
+    background:var(--panel-2); border:1px solid var(--line); color:var(--cyan);
+    padding:3px 9px; border-radius:2px; margin:3px 4px 0 0;
+  }
+
+  /* results / chart panels */
+  .panel{
+    background:var(--panel); border:1px solid var(--line); border-radius:4px;
+    padding:26px;
+  }
+  .panel-title{font-family:var(--mono); font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:16px;}
+  canvas{max-height:340px;}
+
+  .img-panel img{border-radius:2px; border:1px solid var(--line);}
+  .img-caption{font-family:var(--mono); font-size:11px; color:var(--muted); margin-top:10px; text-align:center;}
+
+  /* dashboard embed */
+  .dashboard-frame{
+    position:relative; width:100%; padding-bottom:66%;
+    border:1px solid var(--line); border-radius:4px; overflow:hidden; background:var(--panel-2);
+  }
+  .dashboard-frame iframe{
+    position:absolute; inset:0; width:100%; height:100%; border:0;
+  }
+  .dashboard-note{
+    font-family:var(--mono); font-size:12px; color:var(--muted);
+    margin-top:14px; padding:12px 16px; border-left:2px solid var(--amber);
+    background:var(--panel);
+  }
+
+  /* stack */
+  .stack-row{display:flex; flex-wrap:wrap; gap:10px; margin-top:24px;}
+  .stack-chip{
+    font-family:var(--mono); font-size:0.82rem; color:var(--text);
+    border:1px solid var(--line); background:var(--panel);
+    padding:8px 14px; border-radius:2px;
+  }
+
+  footer{padding:56px 0 40px; border-top:1px solid var(--line);}
+  .footer-row{display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;}
+  .footer-links{display:flex; gap:20px;}
+  .footer-links a{font-family:var(--mono); font-size:12px; color:var(--muted); text-decoration:none;}
+  .footer-links a:hover{color:var(--amber);}
+  .footer-meta{font-family:var(--mono); font-size:11px; color:var(--muted);}
+
+  @media (prefers-reduced-motion: reduce){
+    .pl-pulse{animation:none; left:50%;}
+    html{scroll-behavior:auto;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <nav>
+    <a href="#top" class="logo"><span class="dot"></span>factory.process/ml</a>
+    <ul class="navlinks">
+      <li><a href="#problem">problem</a></li>
+      <li><a href="#approach">approach</a></li>
+      <li><a href="#results">results</a></li>
+      <li><a href="#rootcause">root cause</a></li>
+      <li><a href="#dashboard">dashboard</a></li>
+      <li><a href="#stack">stack</a></li>
+    </ul>
+  </nav>
+</header>
+
+<main id="top">
+  <div class="wrap hero">
+    <div class="eyebrow">Applied ML · Manufacturing Quality</div>
+    <h1>Predicting defects in a <span class="accent">continuous factory process</span>, before they leave the line.</h1>
+    <p class="lede">
+      A sensor-driven classification model that flags high-risk output on a real continuous manufacturing
+      line — then traces each flag back to the machine readings most responsible, using feature-importance
+      root cause analysis.
+    </p>
+    <div class="hero-links">
+      <a class="btn btn-solid" href="https://github.com/YOUR-USERNAME/continuous-factory-process" target="_blank" rel="noopener">View on GitHub →</a>
+      <a class="btn btn-ghost" href="#dashboard">Root Cause Dashboard</a>
+      <a class="btn btn-ghost" href="#results">See Results</a>
+    </div>
+
+    <!-- SIGNATURE: process line -->
+    <div class="process-line">
+      <div class="pl-track"><div class="pl-pulse"></div></div>
+      <div class="pl-stages">
+        <div class="pl-stage">
+          <div class="pl-num">01 / INPUT</div>
+          <div class="pl-title">Raw sensor data</div>
+          <div class="pl-desc">14,088 timestamped readings across 116 machine & process signals</div>
+        </div>
+        <div class="pl-stage">
+          <div class="pl-num">02 / PREP</div>
+          <div class="pl-title">Clean & engineer</div>
+          <div class="pl-desc">Drop timestamps, handle nulls, derive Thermal Load feature</div>
+        </div>
+        <div class="pl-stage">
+          <div class="pl-num">03 / MODEL</div>
+          <div class="pl-title">Train & compare</div>
+          <div class="pl-desc">Decision Tree vs Random Forest on top-quintile defect risk</div>
+        </div>
+        <div class="pl-stage">
+          <div class="pl-num">04 / OUTPUT</div>
+          <div class="pl-title">Root cause ranking</div>
+          <div class="pl-desc">Feature importances surfaced in a Tableau dashboard</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-num">95.9%</div>
+        <div class="stat-label">Random Forest accuracy</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">14,088</div>
+        <div class="stat-label">Process records</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">116</div>
+        <div class="stat-label">Sensor features</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">20%</div>
+        <div class="stat-label">Flagged as high defect risk</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROBLEM -->
+  <section id="problem">
+    <div class="wrap">
+      <div class="sec-eyebrow">The Problem</div>
+      <h2>A continuous production line generates more sensor data than any operator can watch in real time.</h2>
+      <p class="sec-intro">
+        The dataset comes from a real continuous manufacturing process, logging machine speed, temperature,
+        pressure and amperage across multiple stages. Somewhere in those 116 signals is the early warning
+        for the next defective batch — the goal is finding it before the batch ships.
+      </p>
+      <div class="grid-2">
+        <div class="card">
+          <h3>Why it's hard</h3>
+          <p>Defects are the minority class — only ~20% of output falls into the high-risk band once
+          the continuous target measurement is thresholded into "defect risk / not."
+          A model that just predicts "fine" most of the time still looks deceptively accurate.</p>
+        </div>
+        <div class="card">
+          <h3>What "solved" looks like</h3>
+          <p>A model that catches high-risk output reliably, and — just as important for a factory floor —
+          points to *which* sensor readings are driving that risk, so engineers know what to physically check.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- APPROACH -->
+  <section id="approach">
+    <div class="wrap">
+      <div class="sec-eyebrow">Approach</div>
+      <h2>From raw log file to a labeled, model-ready dataset.</h2>
+      <div class="grid-2">
+        <div class="card">
+          <h3>Cleaning & labeling</h3>
+          <ul>
+            <li>Dropped the raw timestamp column; kept only numeric process signals</li>
+            <li>Removed rows with missing target measurements</li>
+            <li>Converted the continuous output measurement into a binary label — top 20% (80th percentile) flagged as high defect risk</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>Feature engineering</h3>
+          <ul>
+            <li>Renamed key raw sensor columns to readable names — <span class="code-pill">Speed</span><span class="code-pill">Temp</span><span class="code-pill">Amps</span></li>
+            <li>Derived a new <span class="code-pill">Thermal_Load</span> feature (Temp × Amps) as a physically meaningful stress signal</li>
+            <li>80/20 train-test split, stratified by the resulting defect-risk label</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- RESULTS -->
+  <section id="results">
+    <div class="wrap">
+      <div class="sec-eyebrow">Results</div>
+      <h2>Random Forest edged out a single Decision Tree — and generalized more reliably.</h2>
+      <p class="sec-intro">Both models were trained on the same 80/20 split and evaluated on held-out data.</p>
+
+      <div class="grid-2">
+        <div class="panel">
+          <div class="panel-title">Model Accuracy Comparison</div>
+          <canvas id="accuracyChart"></canvas>
+        </div>
+        <div class="panel img-panel">
+          <div class="panel-title">Confusion Matrix — Random Forest</div>
+          <img src="assets/confusion_matrix.png" alt="Random Forest confusion matrix showing predicted vs actual defect risk">
+          <div class="img-caption">Predicted vs. actual defect-risk class on the test set</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ROOT CAUSE -->
+  <section id="rootcause">
+    <div class="wrap">
+      <div class="sec-eyebrow">Root Cause Analysis</div>
+      <h2>Which sensors actually drive defect risk?</h2>
+      <p class="sec-intro">
+        Feature importances from the Random Forest rank every one of the 116 signals by how much it
+        contributed to the model's decisions. The top ten point straight at Stage 1 output measurements
+        and Combiner Operation temperatures — a concrete list for engineers to go check on the floor.
+      </p>
+      <div class="panel">
+        <div class="panel-title">Top 10 Features by Importance</div>
+        <canvas id="importanceChart" style="max-height:420px;"></canvas>
+      </div>
+    </div>
+  </section>
+
+  <!-- DASHBOARD -->
+  <section id="dashboard">
+    <div class="wrap">
+      <div class="sec-eyebrow">Interactive Dashboard</div>
+      <h2>Explore the root cause dashboard directly.</h2>
+      <p class="sec-intro">
+        Built in Tableau from the same feature-importance and process data — filter by stage, machine,
+        or measurement to see where defect risk concentrates.
+      </p>
+      <div class="dashboard-frame">
+        <iframe src="https://public.tableau.com/views/YOUR_WORKBOOK_NAME/YOUR_DASHBOARD_NAME?:showVizHome=no&:embed=true"
+                allowfullscreen></iframe>
+      </div>
+      <div class="dashboard-note">
+        Replace the iframe src above once you've published Root_cause_analysis_dashboard.twbx to Tableau Public — steps below.
+      </div>
+    </div>
+  </section>
+
+  <!-- STACK -->
+  <section id="stack">
+    <div class="wrap">
+      <div class="sec-eyebrow">Tech Stack</div>
+      <h2>Built with</h2>
+      <div class="stack-row">
+        <span class="stack-chip">Python</span>
+        <span class="stack-chip">pandas</span>
+        <span class="stack-chip">NumPy</span>
+        <span class="stack-chip">scikit-learn</span>
+        <span class="stack-chip">Decision Tree</span>
+        <span class="stack-chip">Random Forest</span>
+        <span class="stack-chip">matplotlib</span>
+        <span class="stack-chip">seaborn</span>
+        <span class="stack-chip">Tableau</span>
+        <span class="stack-chip">Jupyter</span>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap footer-row">
+    <div class="footer-meta">© Continuous Factory Process — Defect Prediction Project</div>
+    <div class="footer-links">
+      <a href="https://github.com/YOUR-USERNAME" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://www.linkedin.com/in/YOUR-LINKEDIN" target="_blank" rel="noopener">LinkedIn</a>
+      <a href="mailto:YOUR-EMAIL@example.com">Email</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  Chart.defaults.color = '#8b98a3';
+  Chart.defaults.font.family = "'IBM Plex Mono', monospace";
+  Chart.defaults.font.size = 11;
+
+  new Chart(document.getElementById('accuracyChart'), {
+    type: 'bar',
+    data: {
+      labels: ['Decision Tree', 'Random Forest'],
+      datasets: [{
+        label: 'Accuracy',
+        data: [94.6, 95.9],
+        backgroundColor: ['#4fb8c4', '#f2a33d'],
+        borderRadius: 3,
+        maxBarThickness: 70
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { min: 90, max: 100, grid: { color: '#2a343c' }, ticks: { callback: v => v + '%' } },
+        x: { grid: { display: false } }
+      }
+    }
+  });
+
+  new Chart(document.getElementById('importanceChart'), {
+    type: 'bar',
+    data: {
+      labels: [
+        'Stage1.Output.Measurement14',
+        'Stage1.Output.Measurement2',
+        'Combiner.Temperature2',
+        'Machine3.MaterialPressure',
+        'Combiner.Temperature1',
+        'Stage1.Output.Measurement4',
+        'Stage1.Output.Measurement0',
+        'Stage1.Output.Measurement9',
+        'Machine5.Temperature4',
+        'Stage1.Output.Measurement8'
+      ],
+      datasets: [{
+        label: 'Importance',
+        data: [0.0867, 0.0598, 0.0579, 0.0511, 0.0472, 0.0472, 0.0369, 0.0283, 0.0271, 0.0261],
+        backgroundColor: '#f2a33d',
+        borderRadius: 3
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { color: '#2a343c' } },
+        y: { grid: { display: false } }
+      }
+    }
+  });
+</script>
+
+</body>
+</html>
