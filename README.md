@@ -1,9 +1,8 @@
-[README.md](https://github.com/user-attachments/files/30015672/README.md)
 # Continuous Factory Process — Defect Prediction & Root Cause Analysis
 
 Predicting quality defects on a real continuous manufacturing line using sensor data, and tracing each prediction back to the machine readings most responsible for it.
 
-**Live site:** Live https://sahilpounikar.github.io/continuous-factory-process/
+**Live site:** https://sahilpounikar.github.io/continuous-factory-process/
 
 ---
 
@@ -41,7 +40,7 @@ A continuous production line logs machine speed, temperature, pressure, and ampe
 4. `Machine3.MaterialPressure.U.Actual`
 5. `FirstStage.CombinerOperation.Temperature1.U.Actual`
 
-Full confusion matrix and top-10 feature ranking are in the notebook and on the [live site](https://YOUR-USERNAME.github.io/continuous-factory-process/).
+Full confusion matrix and top-10 feature ranking are in the notebook and on the [live site](https://sahilpounikar.github.io/continuous-factory-process/).
 
 ## Root Cause Dashboard
 
@@ -51,10 +50,10 @@ An interactive Tableau dashboard (`Root_cause_analysis_dashboard.twbx`) lets you
 
 ```
 continuous-factory-process/
-├── index.html                          # project website
-├── assets/
-│   └── confusion_matrix.png            # model evaluation plot
-├── continuous_factory_process.ipynb    # full analysis notebook
+├── index.html              # project website
+├── confusion_matrix.png    # model evaluation plot
+├── target_distribution.png # class distribution plot
+├── continuous_factory_process.ipynb # full analysis notebook
 └── README.md
 ```
 
@@ -71,5 +70,5 @@ jupyter notebook continuous_factory_process.ipynb
 
 ## Author
 
-**Your Name**
-[LinkedIn](https://www.linkedin.com/in/YOUR-LINKEDIN) · [GitHub](https://github.com/YOUR-USERNAME) · YOUR-EMAIL@example.com
+**Sahil Vilas Pounikar**
+[LinkedIn](https://www.linkedin.com/in/sahil-pounikar) · [GitHub](https://github.com/sahilpounikar) · sahilpounikar@gmail.com
