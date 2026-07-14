@@ -40,6 +40,7 @@
 
   ::selection{background:var(--amber); color:var(--void);}
 
+  /* background texture: faint grid, like a factory floor plan */
   body::before{
     content:"";
     position:fixed; inset:0;
@@ -54,6 +55,7 @@
 
   .wrap{max-width:var(--maxw); margin:0 auto; padding:0 28px; position:relative; z-index:1;}
 
+  /* NAV */
   header{
     position:sticky; top:0; z-index:50;
     background:rgba(14,19,23,0.88);
@@ -77,6 +79,7 @@
   .navlinks a:hover{color:var(--amber);}
   @media(max-width:720px){ .navlinks{display:none;} }
 
+  /* HERO */
   .hero{padding:96px 0 64px; position:relative;}
   .eyebrow{
     font-family:var(--mono); font-size:12px; color:var(--cyan);
@@ -107,6 +110,7 @@
   .btn-ghost{color:var(--text);}
   .btn-ghost:hover{border-color:var(--cyan); color:var(--cyan);}
 
+  /* PROCESS LINE — signature element */
   .process-line{
     margin-top:72px; padding:32px 0 8px;
     border-top:1px solid var(--line);
@@ -139,6 +143,7 @@
     .pl-stages{grid-template-columns:1fr 1fr; row-gap:44px;}
   }
 
+  /* STATS */
   .stats{
     display:grid; grid-template-columns:repeat(4,1fr);
     border:1px solid var(--line); border-radius:4px;
@@ -153,6 +158,7 @@
     .stat{border-bottom:1px solid var(--line);}
   }
 
+  /* SECTIONS */
   section{padding:88px 0; border-top:1px solid var(--line);}
   .sec-eyebrow{
     font-family:var(--mono); font-size:12px; color:var(--cyan);
@@ -180,6 +186,7 @@
     padding:3px 9px; border-radius:2px; margin:3px 4px 0 0;
   }
 
+  /* results / chart panels */
   .panel{
     background:var(--panel); border:1px solid var(--line); border-radius:4px;
     padding:26px;
@@ -187,9 +194,10 @@
   .panel-title{font-family:var(--mono); font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:16px;}
   canvas{max-height:340px;}
 
-  .img-panel img{border-radius:2px; border:1px solid var(--line); width:100%; height:auto;}
+  .img-panel img{border-radius:2px; border:1px solid var(--line);}
   .img-caption{font-family:var(--mono); font-size:11px; color:var(--muted); margin-top:10px; text-align:center;}
 
+  /* dashboard embed */
   .dashboard-frame{
     position:relative; width:100%; padding-bottom:66%;
     border:1px solid var(--line); border-radius:4px; overflow:hidden; background:var(--panel-2);
@@ -203,6 +211,7 @@
     background:var(--panel);
   }
 
+  /* stack */
   .stack-row{display:flex; flex-wrap:wrap; gap:10px; margin-top:24px;}
   .stack-chip{
     font-family:var(--mono); font-size:0.82rem; color:var(--text);
@@ -233,6 +242,7 @@
       <li><a href="#approach">approach</a></li>
       <li><a href="#results">results</a></li>
       <li><a href="#rootcause">root cause</a></li>
+      <li><a href="#dashboard">dashboard</a></li>
       <li><a href="#stack">stack</a></li>
     </ul>
   </nav>
@@ -248,11 +258,12 @@
       root cause analysis.
     </p>
     <div class="hero-links">
-      <a class="btn btn-solid" href="https://github.com/sahilpounikar/continuous-factory-process" target="_blank" rel="noopener">View on GitHub →</a>
+      <a class="btn btn-solid" href="https://github.com/YOUR-USERNAME/continuous-factory-process" target="_blank" rel="noopener">View on GitHub →</a>
+      <a class="btn btn-ghost" href="#dashboard">Root Cause Dashboard</a>
       <a class="btn btn-ghost" href="#results">See Results</a>
-      <a class="btn btn-ghost" href="#rootcause">Root Cause Ranking</a>
     </div>
 
+    <!-- SIGNATURE: process line -->
     <div class="process-line">
       <div class="pl-track"><div class="pl-pulse"></div></div>
       <div class="pl-stages">
@@ -274,7 +285,7 @@
         <div class="pl-stage">
           <div class="pl-num">04 / OUTPUT</div>
           <div class="pl-title">Root cause ranking</div>
-          <div class="pl-desc">Feature importances surfaced for process engineering optimization</div>
+          <div class="pl-desc">Feature importances surfaced in a Tableau dashboard</div>
         </div>
       </div>
     </div>
@@ -299,6 +310,7 @@
     </div>
   </div>
 
+  <!-- PROBLEM -->
   <section id="problem">
     <div class="wrap">
       <div class="sec-eyebrow">The Problem</div>
@@ -324,6 +336,7 @@
     </div>
   </section>
 
+  <!-- APPROACH -->
   <section id="approach">
     <div class="wrap">
       <div class="sec-eyebrow">Approach</div>
@@ -349,6 +362,7 @@
     </div>
   </section>
 
+  <!-- RESULTS -->
   <section id="results">
     <div class="wrap">
       <div class="sec-eyebrow">Results</div>
@@ -356,20 +370,20 @@
       <p class="sec-intro">Both models were trained on the same 80/20 split and evaluated on held-out data.</p>
 
       <div class="grid-2">
-        <div class="panel img-panel">
-          <div class="panel-title">Target Dataset Baseline Distribution</div>
-          <img src="target_distribution.png" alt="Baseline dataset target distribution countplot">
-          <div class="img-caption">Visualizing original data balance across binary target thresholds</div>
+        <div class="panel">
+          <div class="panel-title">Model Accuracy Comparison</div>
+          <canvas id="accuracyChart"></canvas>
         </div>
         <div class="panel img-panel">
           <div class="panel-title">Confusion Matrix — Random Forest</div>
-          <img src="confusion_matrix.png" alt="Random Forest confusion matrix showing predicted vs actual defect risk">
+          <img src="assets/confusion_matrix.png" alt="Random Forest confusion matrix showing predicted vs actual defect risk">
           <div class="img-caption">Predicted vs. actual defect-risk class on the test set</div>
         </div>
       </div>
     </div>
   </section>
 
+  <!-- ROOT CAUSE -->
   <section id="rootcause">
     <div class="wrap">
       <div class="sec-eyebrow">Root Cause Analysis</div>
@@ -386,6 +400,26 @@
     </div>
   </section>
 
+  <!-- DASHBOARD -->
+  <section id="dashboard">
+    <div class="wrap">
+      <div class="sec-eyebrow">Interactive Dashboard</div>
+      <h2>Explore the root cause dashboard directly.</h2>
+      <p class="sec-intro">
+        Built in Tableau from the same feature-importance and process data — filter by stage, machine,
+        or measurement to see where defect risk concentrates.
+      </p>
+      <div class="dashboard-frame">
+        <iframe src="https://public.tableau.com/views/YOUR_WORKBOOK_NAME/YOUR_DASHBOARD_NAME?:showVizHome=no&:embed=true"
+                allowfullscreen></iframe>
+      </div>
+      <div class="dashboard-note">
+        Replace the iframe src above once you've published Root_cause_analysis_dashboard.twbx to Tableau Public — steps below.
+      </div>
+    </div>
+  </section>
+
+  <!-- STACK -->
   <section id="stack">
     <div class="wrap">
       <div class="sec-eyebrow">Tech Stack</div>
@@ -408,11 +442,11 @@
 
 <footer>
   <div class="wrap footer-row">
-    <div class="footer-meta">© Continuous Factory Process — Sahil Vilas Pounikar</div>
+    <div class="footer-meta">© Continuous Factory Process — Defect Prediction Project</div>
     <div class="footer-links">
-      <a href="https://github.com/sahilpounikar" target="_blank" rel="noopener">GitHub</a>
-      <a href="https://www.linkedin.com/in/sahil-pounikar" target="_blank" rel="noopener">LinkedIn</a>
-      <a href="mailto:sahilpounikar@example.com">Email</a>
+      <a href="https://github.com/YOUR-USERNAME" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://www.linkedin.com/in/YOUR-LINKEDIN" target="_blank" rel="noopener">LinkedIn</a>
+      <a href="mailto:YOUR-EMAIL@example.com">Email</a>
     </div>
   </div>
 </footer>
@@ -421,6 +455,28 @@
   Chart.defaults.color = '#8b98a3';
   Chart.defaults.font.family = "'IBM Plex Mono', monospace";
   Chart.defaults.font.size = 11;
+
+  new Chart(document.getElementById('accuracyChart'), {
+    type: 'bar',
+    data: {
+      labels: ['Decision Tree', 'Random Forest'],
+      datasets: [{
+        label: 'Accuracy',
+        data: [94.6, 95.9],
+        backgroundColor: ['#4fb8c4', '#f2a33d'],
+        borderRadius: 3,
+        maxBarThickness: 70
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { min: 90, max: 100, grid: { color: '#2a343c' }, ticks: { callback: v => v + '%' } },
+        x: { grid: { display: false } }
+      }
+    }
+  });
 
   new Chart(document.getElementById('importanceChart'), {
     type: 'bar',
